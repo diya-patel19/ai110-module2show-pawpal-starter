@@ -7,6 +7,8 @@
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
+Three core actions that the user must be able to preform is add one or multiple pets with specific informaiton on each, block out times in their schedule when they are unable to engage in activities such as taking their pet for a walk, and see what needs to be done every day in terms of things like walks, food, medications, etc. for each of their pets. 
+
 **b. Design changes**
 
 - Did your design change during implementation?
