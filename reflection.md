@@ -2,17 +2,21 @@
 
 ## 1. System Design
 
+Three core actions that the user must be able to preform is add one or multiple pets with specific informaiton on each, block out times in their schedule when they are unable to engage in activities such as taking their pet for a walk, and see what needs to be done every day in terms of things like walks, food, medications, etc. for each of their pets. 
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
-Three core actions that the user must be able to preform is add one or multiple pets with specific informaiton on each, block out times in their schedule when they are unable to engage in activities such as taking their pet for a walk, and see what needs to be done every day in terms of things like walks, food, medications, etc. for each of their pets. 
+The classes that I included included were Pet, Task, Constraint, and DailyPlan. The Pet class represents the owners pets with attributes describing each pet. It also manages tasks regarding the pet. The Task class defines specific care activities, and properties include frequency, duration, and priotity. The Constraint class contains all the scheduling rtules and similation. And the DailyPlan class takes all the information and creates an optimized daily plan for the user to follow. 
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+Yes, the design slightly changed during implementaion. One change I made was adding logic to DailyPlan to create a schedule. Originally, it just stored tasks, but using the AI agent, I was able to add logic that shows when the tasks and scheduled during the day. 
 
 ---
 

@@ -54,6 +54,44 @@ Paste a sample of your app's CLI or Streamlit output here so a reader can see wh
 #   ...
 ```
 
+Created owner: Alice Johnson
+
+Added pets: Max and Luna
+
+Added tasks to pets:
+
+Max (Dog/Golden Retriever, age 3) - 3 pending tasks:
+  ○ Morning walk (30min) - high
+  ○ Breakfast (10min) - high
+  ○ Evening playtime (20min) - medium
+
+Luna (Cat/Siamese, age 2) - 3 pending tasks:
+  ○ Breakfast (5min) - high
+  ○ Give allergy medication (10min) - high
+  ○ Brush fur (15min) - low
+
+============================================================
+TODAY'S SCHEDULE
+============================================================
+08:00 - 08:30 | Max: Morning walk (high)
+08:30 - 08:40 | Max: Breakfast (high)
+08:40 - 08:45 | Luna: Breakfast (high)
+08:45 - 08:55 | Luna: Give allergy medication (high)
+08:55 - 09:15 | Max: Evening playtime (medium)
+09:15 - 09:30 | Luna: Brush fur (low)
+
+------------------------------------------------------------
+Total time required: 90 minutes
+Owner availability: 08:00:00 - 22:00:00
+------------------------------------------------------------
+
+============================================================
+OWNER SUMMARY
+============================================================
+Alice Johnson (2 pets, 6/6 tasks pending)
+  • Max (Dog/Golden Retriever, age 3) - 3 pending tasks
+  • Luna (Cat/Siamese, age 2) - 3 pending tasks
+
 ## 🧪 Testing PawPal+
 
 ```bash

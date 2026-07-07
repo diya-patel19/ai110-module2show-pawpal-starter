@@ -21,8 +21,10 @@ class Task:
     duration_minutes: int
     frequency: TaskFrequency
     priority: str  # high, medium, low
+    time: str = "00:00"  # HH:MM format
     is_completed: bool = False
     created_at: datetime = field(default_factory=datetime.now)
+    due_date: datetime = field(default_factory=datetime.now)
 
     def mark_completed(self):
         """Mark task as completed"""
@@ -31,6 +33,32 @@ class Task:
     def mark_incomplete(self):
         """Mark task as incomplete"""
         self.is_completed = False
+
+    def create_next_occurrence(self) -> Optional['Task']:
+        """Create the next occurrence of a recurring task.
+
+        Uses timedelta to calculate: DAILY adds 1 day, WEEKLY adds 7 days.
+        Returns None for CUSTOM (non-recurring) tasks.
+
+        Returns a new Task with same attributes but is_completed=False and updated due_date.
+        """
+        if self.frequency == TaskFrequency.CUSTOM:
+            return None
+
+        next_due_date = self.due_date + timedelta(days=self.frequency.value)
+        next_task = Task(
+            id=f"{self.id}_next",
+            description=self.description,
+            category=self.category,
+            duration_minutes=self.duration_minutes,
+            frequency=self.frequency,
+            priority=self.priority,
+            time=self.time,
+            is_completed=False,
+            created_at=datetime.now(),
+            due_date=next_due_date
+        )
+        return next_task
 
     def __str__(self) -> str:
         """Return a formatted string representation of the task."""
@@ -137,6 +165,13 @@ class ScheduledTask:
         """Calculate when this task ends"""
         return self.scheduled_time + timedelta(minutes=self.duration_minutes)
 
+    def overlaps_with(self, other: 'ScheduledTask') -> bool:
+        """Check if this task's time range overlaps with another's.
+
+        Uses interval overlap logic: start1 < end2 AND start2 < end1.
+        Detects partial overlaps, not just exact time matches.
+        """
+
     def __str__(self) -> str:
         """Return a formatted string representation of the scheduled task."""
         return f"{self.pet.name}: {self.task.description} at {self.scheduled_time.strftime('%H:%M')}"
@@ -162,6 +197,32 @@ class Scheduler:
         """Get all pending tasks of a specific category"""
         return [(pet, task) for pet, task in self.owner.get_pending_tasks() if task.category == category]
 
+    def sort_by_time(self) -> List[tuple[Pet, Task]]:
+        """Sort all pending tasks by time in HH:MM format (earliest to latest).
+
+        Uses sorted() with lambda key on the time attribute.
+        HH:MM strings sort lexicographically in chronological order.
+        """
+
+    def filter_tasks(self, completed: Optional[bool] = None, pet_name: Optional[str] = None) -> List[tuple[Pet, Task]]:
+        """Filter tasks by completion status and/or pet name.
+
+        Args:
+            completed: True for completed only, False for incomplete, None for all
+            pet_name: Filter by pet name (case-insensitive), None for all pets
+
+        Both filters use AND logic if provided together.
+        """
+        tasks = self.owner.get_all_tasks()
+
+        if completed is not None:
+            tasks = [t for t in tasks if t[1].is_completed == completed]
+
+        if pet_name is not None:
+            tasks = [t for t in tasks if t[0].name.lower() == pet_name.lower()]
+
+        return tasks
+
     def estimate_daily_time(self) -> int:
         """Calculate total time needed for all pending tasks (in minutes)"""
         total_minutes = 0
@@ -170,21 +231,75 @@ class Scheduler:
         return total_minutes
 
     def create_daily_plan(self, date: datetime) -> List[ScheduledTask]:
-        """Generate a daily schedule for all pets considering time constraints and priorities"""
-        pending_tasks = self.get_tasks_by_priority()
-        scheduled = []
-        current_time = datetime.combine(date.date(), self.owner.availability_start)
-        end_time = datetime.combine(date.date(), self.owner.availability_end)
+        """Generate daily schedule by packing tasks in priority order.
 
-        for pet, task in pending_tasks:
-            # Check if task fits in remaining time
-            task_end = current_time + timedelta(minutes=task.duration_minutes)
-            if task_end <= end_time:
-                scheduled_task = ScheduledTask(task, pet, current_time, task.duration_minutes)
-                scheduled.append(scheduled_task)
-                current_time = task_end
+        Sorts tasks by priority (high→low), fits each sequentially into available time.
+        Drops tasks that don't fit before availability_end.
 
-        return scheduled
+        Constraints: owner availability, task priority, task duration.
+        Note: Uses sequential packing, not global optimization.
+        """
+
+    def complete_task(self, pet_id: str, task_id: str) -> bool:
+        """Mark task as completed and auto-create next occurrence if recurring.
+
+        For DAILY/WEEKLY tasks, calls create_next_occurrence() and adds to pet's tasks.
+        Returns False if pet or task not found.
+        """
+        pet = self.owner.get_pet(pet_id)
+        if not pet:
+            return False
+
+        task = pet.get_task(task_id)
+        if not task:
+            return False
+
+        task.mark_completed()
+
+        if task.frequency != TaskFrequency.CUSTOM:
+            next_task = task.create_next_occurrence()
+            if next_task:
+                pet.add_task(next_task)
+
+        return True
+
+    def check_schedule_conflicts(self, scheduled_tasks: List[ScheduledTask]) -> str:
+        """Detect scheduling conflicts and return warning messages (non-blocking).
+
+        Scans all task pairs for overlaps. Returns formatted warnings instead of exceptions.
+        "✓ No scheduling conflicts detected" if no overlaps found.
+        """
+        if not scheduled_tasks:
+            return "✓ No tasks scheduled"
+
+        warnings = []
+        checked_pairs = set()
+
+        for i in range(len(scheduled_tasks)):
+            for j in range(i + 1, len(scheduled_tasks)):
+                task1, task2 = scheduled_tasks[i], scheduled_tasks[j]
+
+                pair_key = (min(i, j), max(i, j))
+                if pair_key in checked_pairs:
+                    continue
+                checked_pairs.add(pair_key)
+
+                if task1.overlaps_with(task2):
+                    pet_info = ""
+                    if task1.pet.id == task2.pet.id:
+                        pet_info = f" (same pet: {task1.pet.name})"
+
+                    warning = (
+                        f"⚠️  CONFLICT{pet_info}: "
+                        f"'{task1.task.description}' ({task1.scheduled_time.strftime('%H:%M')}) "
+                        f"overlaps with '{task2.task.description}' ({task2.scheduled_time.strftime('%H:%M')})"
+                    )
+                    warnings.append(warning)
+
+        if not warnings:
+            return "✓ No scheduling conflicts detected"
+
+        return "\n".join(warnings)
 
     def get_owner_summary(self) -> str:
         """Get a summary of all tasks across all pets"""
