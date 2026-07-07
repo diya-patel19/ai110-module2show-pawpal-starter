@@ -107,17 +107,25 @@ Sample test output:
 ```
 # Paste your pytest output here
 ```
+Command to run tests: python3 -m pytest
+
+Terminal output if all tests successful: 
+test_pawpal.py ...........                                                                                                                                                                     [100%]
+
+========================================================================================= 11 passed in 0.02s =========================================================================================
+
+The pytests written tests various features across the app. This includes adding tasks, completing tasks, sorting tasks, recurring tasks, and confliction of tasks in the schedule. My confidence level on this app is 4 stars out of 5. It has passed all the tests entirely without bugging out, but it is still possible that there are some bugs and imperfections.
 
 ## 📐 Smarter Scheduling
 
 > Fill in once you've implemented scheduling logic.
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Feature           | Method(s)                                  | Notes                                 |
+|-------------------|--------------------------------------------|---------------------------------------|
+| Task sorting      | create_daily_plan()                        | sorts tasks by priority + availablity |
+| Filtering         | complete_task()                            | marks complete + recurrence           |
+| Conflict handling | estimate_daily_time()                      | sums pending task durations           |
+| Recurring tasks   | get_daily_tasks(), get_tasks_by_category() | get tasks by date/category            |
 
 ## 📸 Demo Walkthrough
 

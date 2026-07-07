@@ -27,10 +27,14 @@ Yes, the design slightly changed during implementaion. One change I made was add
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+The scheduler considers a wide range of constraints, including time/availablity, task duration, priotity, and task frequency. Priority mattered the most, because that is already labeled with whats most important. Then comes avaliablity and task duration, since every tasks needs ample time to compelete it. Then finally, frequency was the least important, since it only affects how often the task occurs, not the actual scheduling. 
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+One tradeoff the scheduler makes is check for time blocks when looking for conflicts in tasks. It requires more computation on the scheduler's end, but it means that it can accurately check for when two tasks are clashing and not just if they start at the same time. 
 
 ---
 

@@ -171,6 +171,7 @@ class ScheduledTask:
         Uses interval overlap logic: start1 < end2 AND start2 < end1.
         Detects partial overlaps, not just exact time matches.
         """
+        return self.scheduled_time < other.end_time() and other.scheduled_time < self.end_time()
 
     def __str__(self) -> str:
         """Return a formatted string representation of the scheduled task."""
@@ -203,6 +204,8 @@ class Scheduler:
         Uses sorted() with lambda key on the time attribute.
         HH:MM strings sort lexicographically in chronological order.
         """
+        tasks = self.owner.get_pending_tasks()
+        return sorted(tasks, key=lambda x: x[1].time)
 
     def filter_tasks(self, completed: Optional[bool] = None, pet_name: Optional[str] = None) -> List[tuple[Pet, Task]]:
         """Filter tasks by completion status and/or pet name.
