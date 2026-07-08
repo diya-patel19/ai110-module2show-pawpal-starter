@@ -131,10 +131,11 @@ The pytests written tests various features across the app. This includes adding 
 
 Describe your app in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. Set up your owner account by inputting your email and name
+2. Add your pets and their information, inlcduing their name, species, breed, and age. Make sure you add all of your pets!
+3. Create tasks for each of your pets. Each task will have information such as description, type of task, duration, priority, and frequency. You are able to add multiple tasks for each of your pets. 
+4. You will now see all of your tasks listed out, either by time, priority, and category. You can click the 'generate schedule' button and have a daily plan created for you! 
+5. You can mark any tasks as done using the list right above the daily plant
+5. The summary at the bottom will give you quick information of you, your pets, and any pending tasks. 
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->

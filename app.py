@@ -114,10 +114,12 @@ if st.session_state.owner:
         with col3:
             duration = st.number_input("Duration (min)", min_value=1, max_value=240, value=30)
 
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
-            priority = st.selectbox("Priority", ["low", "medium", "high"])
+            task_time = st.time_input("Task time", value=datetime.strptime("09:00", "%H:%M").time())
         with col2:
+            priority = st.selectbox("Priority", ["low", "medium", "high"])
+        with col3:
             frequency = st.selectbox("Frequency", [f.name for f in TaskFrequency])
 
         if st.button("Add Task"):
@@ -127,7 +129,8 @@ if st.session_state.owner:
                 category=category,
                 duration_minutes=int(duration),
                 frequency=TaskFrequency[frequency],
-                priority=priority
+                priority=priority,
+                time=task_time.strftime("%H:%M")
             )
             selected_pet.add_task(new_task)
             st.success(f"Task '{task_description}' added to {selected_pet.name}!")
@@ -144,12 +147,76 @@ if st.session_state.owner:
 
     st.divider()
 
-    # Schedule Generation Section
+    # Task Sorting and Filtering Section
+    st.subheader("🔍 View & Sort Tasks")
+
+    scheduler = Scheduler(st.session_state.owner)
+    tab1, tab2, tab3 = st.tabs(["📋 By Time", "⭐ By Priority", "🏷️ By Category"])
+
+    with tab1:
+        st.write("**Tasks sorted by time (earliest to latest)**")
+        sorted_by_time = scheduler.sort_by_time()
+        if sorted_by_time:
+            time_data = []
+            for pet, task in sorted_by_time:
+                time_data.append({
+                    "Time": task.time,
+                    "Pet": pet.name,
+                    "Task": task.description,
+                    "Priority": task.priority.upper(),
+                    "Duration": f"{task.duration_minutes}min"
+                })
+            st.table(time_data)
+        else:
+            st.info("No pending tasks to sort.")
+
+    with tab2:
+        st.write("**Tasks sorted by priority (high → medium → low)**")
+        sorted_by_priority = scheduler.get_tasks_by_priority()
+        if sorted_by_priority:
+            priority_data = []
+            for pet, task in sorted_by_priority:
+                priority_data.append({
+                    "Priority": task.priority.upper(),
+                    "Pet": pet.name,
+                    "Task": task.description,
+                    "Time": task.time,
+                    "Duration": f"{task.duration_minutes}min"
+                })
+            st.table(priority_data)
+        else:
+            st.info("No pending tasks to sort.")
+
+    with tab3:
+        categories = set(task.category for _, task in scheduler.owner.get_all_tasks())
+        if categories:
+            selected_category = st.selectbox("Filter by category", sorted(categories))
+            category_tasks = scheduler.get_tasks_by_category(selected_category)
+            if category_tasks:
+                category_data = []
+                for pet, task in category_tasks:
+                    category_data.append({
+                        "Category": task.category,
+                        "Pet": pet.name,
+                        "Task": task.description,
+                        "Priority": task.priority.upper(),
+                        "Time": task.time
+                    })
+                st.table(category_data)
+            else:
+                st.info(f"No pending tasks in '{selected_category}' category.")
+        else:
+            st.info("No tasks to filter.")
+
+    st.divider()
+
+    # Schedule Generation with Conflict Detection
     st.subheader("📅 Generate Daily Schedule")
 
     if st.button("Generate Schedule"):
         scheduler = Scheduler(st.session_state.owner)
         today = datetime.now()
+
         daily_plan = scheduler.create_daily_plan(today)
 
         if daily_plan:
@@ -168,6 +235,14 @@ if st.session_state.owner:
                 })
 
             st.table(schedule_data)
+
+            # Check for scheduling conflicts
+            conflict_report = scheduler.check_schedule_conflicts(daily_plan)
+            if "No scheduling conflicts" in conflict_report:
+                st.success("✓ " + conflict_report)
+            else:
+                st.warning(conflict_report)
+
             st.metric("Total Time Required", f"{scheduler.estimate_daily_time()} minutes")
         else:
             st.info("No tasks scheduled. Add tasks to pets first.")

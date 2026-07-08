@@ -242,6 +242,33 @@ class Scheduler:
         Constraints: owner availability, task priority, task duration.
         Note: Uses sequential packing, not global optimization.
         """
+        tasks_by_priority = self.get_tasks_by_priority()
+
+        if not tasks_by_priority:
+            return []
+
+        scheduled_tasks = []
+        availability_start = datetime.combine(date.date(), self.owner.availability_start)
+        availability_end = datetime.combine(date.date(), self.owner.availability_end)
+
+        for pet, task in tasks_by_priority:
+            task_time = datetime.combine(date.date(), datetime.strptime(task.time, "%H:%M").time())
+
+            if task_time < availability_start:
+                task_time = availability_start
+
+            task_end = task_time + timedelta(minutes=task.duration_minutes)
+
+            if task_end <= availability_end:
+                scheduled_task = ScheduledTask(
+                    task=task,
+                    pet=pet,
+                    scheduled_time=task_time,
+                    duration_minutes=task.duration_minutes
+                )
+                scheduled_tasks.append(scheduled_task)
+
+        return scheduled_tasks
 
     def complete_task(self, pet_id: str, task_id: str) -> bool:
         """Mark task as completed and auto-create next occurrence if recurring.

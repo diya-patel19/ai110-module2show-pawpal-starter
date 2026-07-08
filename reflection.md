@@ -59,10 +59,14 @@ One tradeoff the scheduler makes is check for time blocks when looking for confl
 - What behaviors did you test?
 - Why were these tests important?
 
+I tested if all the features in the app were functional, especially the ones regarding tasks and organizing a daily plan. These tests were important because they require a lot of logic to solve and they make sure that the core functionality in the script works properly. 
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
+
+I am pretty confident that the schedule works correctly. The tests pass and the app is able to generate schedules. I would add edge cases about what happens if edge cases go past availabliity and if there are conflicts between 2 tests in terms of availibility and priority. 
 
 ---
 
@@ -72,10 +76,16 @@ One tradeoff the scheduler makes is check for time blocks when looking for confl
 
 - What part of this project are you most satisfied with?
 
+I am most satisfied with the conflict detection using interval overlap. It makes sure that none of the tasks are overlapping, and doens't just focus on the start time. 
+
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
 
+I would improve the UI implmeentation. It is still not fully fixed and can be buggy.
+
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+
+The most important thing I learned from this project was how to break down really complicated logic into seperate methods. I also learned how to go about approaching big projects in small steps, like creating the initial mermaid and the skeelton code, before actually writing the script, tests, and implementing algorithms. 

@@ -1,0 +1,83 @@
+classDiagram
+    class TaskFrequency {
+        <<enumeration>>
+        DAILY = 1
+        TWICE_DAILY = 2
+        WEEKLY = 7
+        CUSTOM = 0
+    }
+
+    class Task {
+        -id: str
+        -description: str
+        -category: str
+        -duration_minutes: int
+        -frequency: TaskFrequency
+        -priority: str
+        -time: str
+        -is_completed: bool
+        -created_at: datetime
+        -due_date: datetime
+        +mark_completed()
+        +mark_incomplete()
+        +create_next_occurrence() Optional[Task]
+    }
+
+    class Pet {
+        -id: str
+        -name: str
+        -species: str
+        -breed: str
+        -age: int
+        -tasks: List[Task]
+        +add_task(task: Task)
+        +remove_task(task_id: str) bool
+        +get_task(task_id: str) Optional[Task]
+        +get_pending_tasks() List[Task]
+    }
+
+    class Owner {
+        -id: str
+        -name: str
+        -email: str
+        -pets: List[Pet]
+        -availability_start: time
+        -availability_end: time
+        +add_pet(pet: Pet)
+        +remove_pet(pet_id: str) bool
+        +get_pet(pet_id: str) Optional[Pet]
+        +get_all_tasks() List[Tuple[Pet, Task]]
+        +get_pending_tasks() List[Tuple[Pet, Task]]
+        +get_tasks_for_pet(pet_id: str) List[Task]
+    }
+
+    class ScheduledTask {
+        -task: Task
+        -pet: Pet
+        -scheduled_time: datetime
+        -duration_minutes: int
+        +end_time() datetime
+        +overlaps_with(other: ScheduledTask) bool
+    }
+
+    class Scheduler {
+        -owner: Owner
+        +get_daily_tasks(date: datetime) List[Tuple[Pet, Task]]
+        +get_tasks_by_priority() List[Tuple[Pet, Task]]
+        +get_tasks_by_category(category: str) List[Tuple[Pet, Task]]
+        +sort_by_time() List[Tuple[Pet, Task]]
+        +filter_tasks(completed: bool, pet_name: str) List[Tuple[Pet, Task]]
+        +estimate_daily_time() int
+        +create_daily_plan(date: datetime) List[ScheduledTask]
+        +complete_task(pet_id: str, task_id: str) bool
+        +check_schedule_conflicts(scheduled_tasks: List[ScheduledTask]) str
+        +get_owner_summary() str
+    }
+
+    %% Relationships
+    Owner "1" --> "*" Pet : has
+    Pet "1" --> "*" Task : contains
+    Task "*" --> "1" TaskFrequency : uses
+    Scheduler "1" --> "1" Owner : manages
+    ScheduledTask "*" --> "1" Task : wraps
+    ScheduledTask "*" --> "1" Pet : references
